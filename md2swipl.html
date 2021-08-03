@@ -174,17 +174,7 @@ Pseudo {
 <p>b2bsw semantics:</p>
 <textarea id="b2bswsemantics" rows="10" cols="90" placeholder="semantics" style="background-color:oldlace;">
 Main [lb id commands details rb] = [[
-#!/bin/bash
-# ${id}\n
-clear
-set -e
-trap 'catch' ERR
-
-catch () {
-    echo '*** FATAL ERROR ***'
-    exit 1
-}
-
+${preamble (id)}
 ${details}\n${commands}]]
 Commands [lb id @choices rb] = [[# ${id}\n${choices}]]
 Details [lb id @choices rb] = [[# ${id}\n${choices}]]
@@ -223,7 +213,21 @@ followChar [c] = [[${c}]]
 <script src="support.js"></script>
 <script>
 
+  function preamble (id) {
+      return `
+#!/bin/bash
+# ${id}\n
+clear
+set -e
+trap 'catch' ERR
 
+catch () {
+    echo '*** FATAL ERROR ***'
+    exit 1
+}
+`;
+  }
+  
   function pass (grammar, semantics, source, output, status) {
       let scnGrammar = document.getElementById(grammar).value;
       let scnSemantics = document.getElementById(semantics).value;
@@ -260,6 +264,7 @@ followChar [c] = [[${c}]]
   function generate () {
       md2pseudo ();
       pseudo2bash ();
+      pseudobash2bashswipl ();
   }
   
   </script>
