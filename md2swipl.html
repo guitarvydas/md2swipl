@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+textarea {
+}
+</style>
+</head>
+<body>
+
+<h1>Code Markdown to Bash Transpiler</h1>
+
+<!-- code markdown to pseudo -->
+
+<p>code markdown grammar:</p>
+<textarea id="cmdgrammar" rows="10" cols="90" placeholder="code markdown grammar" style="background-color:oldlace">
+ToBrace {
+
+main = line+
+line = indent? spc? toEOL+ linetail
+linetail =   newline toIndent* -- withContent
+           | newline? end -- withoutContent
+indent = indentChar+
+indentChar = ("#" | "*")
+toIndent = ~indentChar any
+toEOL = ~newline any
+
+newline = "\n"
+spc = " "
+}
+</textarea>
+
+<p>code markdown semantics:</p>
+<textarea id="cmdsemantics" rows="10" cols="90" placeholder="semantics" style="background-color:oldlace;">
+main [@lines] = {{ reset (); }} [[${lines}${closebrackets ()}]]
+line [@indent @spc @head tail] = [[${emitbrackets (indent)}${head}${tail}]]
+linetail_withContent [nl @cs] = [[${nl}${cs}]]
+linetail_withoutContent [@nl e] = [[\n]]
+indent [@indents] = [[${indents}]]
+indentChar [c] = [[${c}]]
+toIndent [c] = [[${c}]]
+toEOL [c] = [[${c}]]
+newline [c] = [[${c}]] 
+spc [c] = [[${c}]]
+</textarea>
+
+<p>code markdown source:</p>
+<textarea id="cmdsource" rows="17" cols="90" placeholder="notation test" style="background-color:oldlace;">
+# _containment_
+
+## _fb pipeline_
+	allContains1
+	printAllDeepContains
+	printAllDirectContains
+
+
+
+## _details_
+### allContains1
+	load fb
+	load onSameDiagram
+	load contain1
+### printAllDeepContains
+	load fb
+	load onSameDiagram
+	load contains2
+### printAllDirectContains
+	load fb
+	load onSameDiagram
+	load contains3
+</textarea>
+
+<p>transpiled:</p>
+<textarea id="cmdtranspiled" rows="17" cols="90" placeholder="transpiled"  readonly style="background-color:whitesmoke;">
+</textarea>
+<br>
+<br>
+<p id="cmdstatus" > READY </p>
+
+<!-- end code markdown to pseudo -->
+
+
+<!-- pseudo to bash -->
+
+
+<p>p2b grammar:</p>
+<textarea id="p2bgrammar" rows="10" cols="90" placeholder="code markdown grammar" style="background-color:oldlace">
+Pseudo {
+  Main = "{" id Commands Details "}"
+  Commands = "{" id Command+ "}"
+  Details = "{" id FunctionBlock+ "}"
+  FunctionBlock = "{" id line+ "}"
+  line = notEOL* newline
+  Command = id
+  id = italicid | ident
+  underscore = "_"
+  newline = "\n"
+  spc = " "
+  notEOL = ~newline ~"}" any
+  italicid = underscore ident underscore
+  ident = firstChar followChar*
+  firstChar = letter
+  followChar = alnum | " "
+}
+</textarea>
+
+<p>p2b semantics:</p>
+<textarea id="p2bsemantics" rows="10" cols="90" placeholder="semantics" style="background-color:oldlace;">
+Main [lb id commands details rb] = [[
+#!/bin/bash
+# ${id}\n
+clear
+set -e
+trap 'catch' ERR
+
+catch () {
+    echo '*** FATAL ERROR ***'
+    exit 1
+}
+
+${details}\n${commands}]]
+Commands [lb id @choices rb] = [[# ${id}\n${choices}]]
+Details [lb id @choices rb] = [[# ${id}\n${choices}]]
+FunctionBlock [lb id @bs rb] = [[${id} () {\n${bs}\n}\n]]
+line [@cs nl] = [[\t${cs}${nl}]]
+Command [str] = [[\t${str}\n]]
+
+id [name] = [[${name}]]
+underscore [c] = [[${c}]]
+newline [c] = [[${c}]]
+spc [c] = [[${c}]]
+notEOL [c] = [[${c}]]
+italicid [u1 id u2] = [[${u1}${id}${u2}]]
+ident [f @cs] = [[${f}${cs}]] 
+firstChar [c] = [[${c}]]
+followChar [c] = [[${c}]]
+</textarea>
+
+<p>transpiled to bash:</p>
+<textarea id="p2btranspiled" rows="17" cols="90" placeholder="transpiled"  readonly style="background-color:whitesmoke;">
+</textarea>
+<br>
+<br>
+<p id="p2bstatus" > READY </p>
+
+<!-- end pseudo to bash -->
+
+
+
+<!-- pseudo bash to bash swipl -->
+
+
+<p>b2bsw grammar:</p>
+<textarea id="b2bswgrammar" rows="10" cols="90" placeholder="code markdown grammar" style="background-color:oldlace">
+Pseudo {
+  Main = "{" id Commands Details "}"
+  Commands = "{" id Command+ "}"
+  Details = "{" id FunctionBlock+ "}"
+  FunctionBlock = "{" id line+ "}"
+  line = notEOL* newline
+  Command = id
+  id = italicid | ident
+  underscore = "_"
+  newline = "\n"
+  spc = " "
+  notEOL = ~newline ~"}" any
+  italicid = underscore ident underscore
+  ident = firstChar followChar*
+  firstChar = letter
+  followChar = alnum | " "
+}
+</textarea>
+
+<p>b2bsw semantics:</p>
+<textarea id="b2bswsemantics" rows="10" cols="90" placeholder="semantics" style="background-color:oldlace;">
+Main [lb id commands details rb] = [[
+#!/bin/bash
+# ${id}\n
+clear
+set -e
+trap 'catch' ERR
+
+catch () {
+    echo '*** FATAL ERROR ***'
+    exit 1
+}
+
+${details}\n${commands}]]
+Commands [lb id @choices rb] = [[# ${id}\n${choices}]]
+Details [lb id @choices rb] = [[# ${id}\n${choices}]]
+FunctionBlock [lb id @bs rb] = [[${id} () {\n${bs}\n}\n]]
+line [@cs nl] = [[\t${cs}${nl}]]
+Command [str] = [[\t${str}\n]]
+
+id [name] = [[${name}]]
+underscore [c] = [[${c}]]
+newline [c] = [[${c}]]
+spc [c] = [[${c}]]
+notEOL [c] = [[${c}]]
+italicid [u1 id u2] = [[${u1}${id}${u2}]]
+ident [f @cs] = [[${f}${cs}]] 
+firstChar [c] = [[${c}]]
+followChar [c] = [[${c}]]
+</textarea>
+
+<p>transpiled to bash:</p>
+<textarea id="b2bswtranspiled" rows="17" cols="90" placeholder="transpiled"  readonly style="background-color:whitesmoke;">
+</textarea>
+<br>
+<br>
+<p id="b2bswstatus" > READY </p>
+
+<!-- end pseudo bash to bash swipl -->
+
+
+
+
+<br>
+<button onclick="generate ()">Generate</button>
+<script src="../scnwb/ohm.js"></script>
+<script src="../scnwb/glue.js"></script>
+<script src="../scnwb/scope.js"></script>
+<script src="support.js"></script>
+<script>
+
+
+  function pass (grammar, semantics, source, output, status) {
+      let scnGrammar = document.getElementById(grammar).value;
+      let scnSemantics = document.getElementById(semantics).value;
+      let notationSource = document.getElementById(source).value;
+      // glueGrammar and glueSemantics defined in ../scnwb/
+      let generatedSCNSemantics = transpiler (scnSemantics, glueGrammar, "_glue", glueSemantics);
+
+      _ruleInit();
+      try {
+          document.getElementById(status).innerHTML = "FAILED";
+          let semObject = eval('(' + generatedSCNSemantics + ')');
+          document.getElementById (output).value = semObject;
+          let tr = transpiler(notationSource, scnGrammar, "_glue", semObject);
+          document.getElementById(output).value = tr;
+          document.getElementById(status).innerHTML = "OK";
+      }
+       catch (err) {
+          document.getElementById(status).innerHTML = err;
+       }
+  }
+
+  function md2pseudo () {
+      pass ('cmdgrammar', 'cmdsemantics', 'cmdsource', 'cmdtranspiled', 'cmdstatus');
+  }
+
+  function pseudo2bash () {
+      pass ('p2bgrammar', 'p2bsemantics', 'cmdtranspiled', 'p2btranspiled', 'p2bstatus');
+  }
+
+  function pseudobash2bashswipl () {
+      pass ('b2bswgrammar', 'b2bswsemantics', 'p2btranspiled', 'b2bswtranspiled', 'b2bswstatus');
+  }
+
+  function generate () {
+      md2pseudo ();
+      pseudo2bash ();
+  }
+  
+  </script>
+</body>
+</html>
+
