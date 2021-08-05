@@ -49,6 +49,7 @@ spc [c] = [[${c}]]
 # _containment_
 
 ## _fb pipeline_
+	setup
 	allContains1
 	printAllDeepContains
 	printAllDirectContains
@@ -56,18 +57,24 @@ spc [c] = [[${c}]]
 
 
 ## _details_
+### setup
+	sh cp ../phase2/fb.pl .
 ### allContains1
 	load fb
 	load onSameDiagram
 	load contain1
+    exec allContains1
 ### printAllDeepContains
 	load fb
 	load onSameDiagram
-	load contains2
+	load contain2
+    exec printAllDeepContains
 ### printAllDirectContains
 	load fb
 	load onSameDiagram
-	load contains3
+	load contain3
+    exec printAllDirectContains
+
 </textarea>
 
 <p>transpiled:</p>
@@ -151,10 +158,12 @@ Pseudo {
   PipelineHeader = "#" "_fb pipeline_"
   line = notEOL+
   PipelineLine = line
-  DetailsLine = FunctionHeader | LoadCommand | EndFunction | NotPipelineLine
+  DetailsLine = FunctionHeader | LoadCommand | ExecCommand | ShCommand | EndFunction | NotPipelineLine
   FunctionHeader = id "()" "{" FirstLoadCommand
   FirstLoadCommand = LoadCommand
   LoadCommand = "load" id
+  ExecCommand = "exec" id
+  ShCommand = "sh" line
   EndFunction = "}"
   NotPipelineLine = ~PipelineHeader line
   
@@ -174,7 +183,7 @@ Pseudo {
 
 <p>b2bsw semantics:</p>
 <textarea id="b2bswsemantics" rows="10" cols="90" placeholder="semantics" style="background-color:oldlace;">
-Main [header details pipeline] = {{ scopeAdd ('functionname', '<unknown>'); }} [[${preamble (header)}${header}${details}${pipeline}]]
+Main [header details pipeline] = {{ scopeAdd ('functionname', '<unknown>'); }} [[${preamble (header)}${details}${pipeline}]]
 Header [k id] = [[${id}]]
 DetailsSection [header @lines] = [[${header}${lines}]]
 PipelineSection [header @lines] = [[${header}${lines}]]
@@ -183,10 +192,12 @@ PipelineHeader [k1 k2] = [[${k1}${k2}\n]]
 line [@cs] = [[${cs}]]
 PipelineLine [line] = [[${line}\n]]
 DetailsLine [line] = [[${line}]]
-FunctionHeader [id k1 k2 flc] = {{ scopeModify ('functionname', _id._glue ()); }} [[${id}${k1}${k2}\n${flc}]]
+FunctionHeader [id k1 k2 flc] = [[${id}${k1}${k2}\n${flc}]]
 FirstLoadCommand [cmd] = [[swipl ${cmd} ]]
 LoadCommand [k id] = [[ -g 'consult(${id}).' ]]
-EndFunction [rb] = [[ -g '${scopeGet ('functionname')}.' -g 'halt.'\n${rb}\n]]
+ExecCommand [k id] = [[ -g '${id}.' -g 'halt.' | ./augment-fb.bash ]]
+ShCommand [k line] = [[\n${line}]]
+EndFunction [rb] = [[\n${rb}\n]]
 NotPipelineLine [line] = [[${line}]]
 
 id [name] = [[${name}]]
