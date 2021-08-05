@@ -8,7 +8,7 @@ textarea {
 </head>
 <body>
 
-<h1>Code Markdown to Bash Transpiler</h1>
+<h1>Code Markdown to Bash+Swipl Transpiler</h1>
 
 <!-- code markdown to pseudo -->
 
@@ -107,17 +107,7 @@ Pseudo {
 <p>p2b semantics:</p>
 <textarea id="p2bsemantics" rows="10" cols="90" placeholder="semantics" style="background-color:oldlace;">
 Main [lb id commands details rb] = [[
-#!/bin/bash
-# ${id}\n
-clear
-set -e
-trap 'catch' ERR
-
-catch () {
-    echo '*** FATAL ERROR ***'
-    exit 1
-}
-
+# ${id}
 ${details}\n${commands}]]
 Commands [lb id @choices rb] = [[# ${id}\n${choices}]]
 Details [lb id @choices rb] = [[# ${id}\n${choices}]]
@@ -150,37 +140,48 @@ followChar [c] = [[${c}]]
 <!-- pseudo bash to bash swipl -->
 
 
-<p>b2bsw grammar:</p>
+<p>b2bsw grok:</p>
 <textarea id="b2bswgrammar" rows="10" cols="90" placeholder="code markdown grammar" style="background-color:oldlace">
 Pseudo {
-  Main = "{" id Commands Details "}"
-  Commands = "{" id Command+ "}"
-  Details = "{" id FunctionBlock+ "}"
-  FunctionBlock = "{" id line+ "}"
-  line = notEOL* newline
-  Command = id
+  Main = Header DetailsSection PipelineSection
+  Header = "#" id
+  DetailsSection = DetailsHeader DetailsLine+
+  PipelineSection = PipelineHeader line+
+  DetailsHeader = "#" "_details_"
+  PipelineHeader = "#" "_fb pipeline"
+  line = notEOL+
+  DetailsLine = FunctionHeader | LoadCommand | NotPipelineLine
+  FunctionHeader = id "()" "{"
+  LoadCommand = "load" id
+  NotPipelineLine = ~PipelineHeader line
+  
+
   id = italicid | ident
   underscore = "_"
   newline = "\n"
   spc = " "
-  notEOL = ~newline ~"}" any
+  notEOL = ~newline any
   italicid = underscore ident underscore
   ident = firstChar followChar*
   firstChar = letter
   followChar = alnum | " "
 }
+
 </textarea>
 
 <p>b2bsw semantics:</p>
 <textarea id="b2bswsemantics" rows="10" cols="90" placeholder="semantics" style="background-color:oldlace;">
-Main [lb id commands details rb] = [[
-${preamble (id)}
-${details}\n${commands}]]
-Commands [lb id @choices rb] = [[# ${id}\n${choices}]]
-Details [lb id @choices rb] = [[# ${id}\n${choices}]]
-FunctionBlock [lb id @bs rb] = [[${id} () {\n${bs}\n}\n]]
-line [@cs nl] = [[\t${cs}${nl}]]
-Command [str] = [[\t${str}\n]]
+Main [header details pipeline] = [[${header}${details}${pipeline}]]
+Header [k id] = [[${k}${id}]]
+DetailsSection [header @lines] = [[${header}${lines}]]
+PipelineSection [header @lines] = [[${header}${lines}]]
+DetailsHeader [k1 k2] = [[${k1}${k2}]]
+PipelineHeader [k1 k2] = [[${k1}${k2}]]
+line [@cs] = [[${cs}]]
+DetailsLine [line] = [[${line}]]
+FunctionHeader [id k1 k2] = [[${id}${k1}${k2}]]
+LoadCommand [k id] = [[${k}{id}]]
+NotPipelineLine [line] = [[${line}]]
 
 id [name] = [[${name}]]
 underscore [c] = [[${c}]]
