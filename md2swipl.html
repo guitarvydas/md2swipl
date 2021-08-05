@@ -148,7 +148,7 @@ Pseudo {
   DetailsSection = DetailsHeader DetailsLine+
   PipelineSection = PipelineHeader PipelineLine+
   DetailsHeader = "#" "_details_"
-  PipelineHeader = "#" "_fb pipeline"
+  PipelineHeader = "#" "_fb pipeline_"
   line = notEOL+
   PipelineLine = line
   DetailsLine = FunctionHeader | LoadCommand | EndFunction | NotPipelineLine
@@ -194,7 +194,7 @@ underscore [c] = [[${c}]]
 newline [c] = [[${c}]]
 spc [c] = [[${c}]]
 notEOL [c] = [[${c}]]
-italicid [u1 id u2] = [[${u1}${id}${u2}]]
+italicid [u1 id u2] = [[_${id}_]]
 ident [f @cs] = [[${f}${cs}]] 
 firstChar [c] = [[${c}]]
 followChar [c] = [[${c}]]
