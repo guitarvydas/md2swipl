@@ -174,8 +174,8 @@ Pseudo {
 
 <p>b2bsw semantics:</p>
 <textarea id="b2bswsemantics" rows="10" cols="90" placeholder="semantics" style="background-color:oldlace;">
-Main [header details pipeline] = {{ scopeAdd ('functionname', '<unknown>'); }} [[${header}${details}${pipeline}]]
-Header [k id] = [[${k}${id}\n]]
+Main [header details pipeline] = {{ scopeAdd ('functionname', '<unknown>'); }} [[${preamble (header)}${header}${details}${pipeline}]]
+Header [k id] = [[${id}]]
 DetailsSection [header @lines] = [[${header}${lines}]]
 PipelineSection [header @lines] = [[${header}${lines}]]
 DetailsHeader [k1 k2] = [[${k1}${k2}\n]]
