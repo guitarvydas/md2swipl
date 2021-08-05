@@ -146,13 +146,16 @@ Pseudo {
   Main = Header DetailsSection PipelineSection
   Header = "#" id
   DetailsSection = DetailsHeader DetailsLine+
-  PipelineSection = PipelineHeader line+
+  PipelineSection = PipelineHeader PipelineLine+
   DetailsHeader = "#" "_details_"
   PipelineHeader = "#" "_fb pipeline"
   line = notEOL+
-  DetailsLine = FunctionHeader | LoadCommand | NotPipelineLine
-  FunctionHeader = id "()" "{"
+  PipelineLine = line
+  DetailsLine = FunctionHeader | LoadCommand | EndFunction | NotPipelineLine
+  FunctionHeader = id "()" "{" FirstLoadCommand
+  FirstLoadCommand = LoadCommand
   LoadCommand = "load" id
+  EndFunction = "}"
   NotPipelineLine = ~PipelineHeader line
   
 
@@ -172,15 +175,18 @@ Pseudo {
 <p>b2bsw semantics:</p>
 <textarea id="b2bswsemantics" rows="10" cols="90" placeholder="semantics" style="background-color:oldlace;">
 Main [header details pipeline] = [[${header}${details}${pipeline}]]
-Header [k id] = [[${k}${id}]]
+Header [k id] = [[${k}${id}\n]]
 DetailsSection [header @lines] = [[${header}${lines}]]
 PipelineSection [header @lines] = [[${header}${lines}]]
-DetailsHeader [k1 k2] = [[${k1}${k2}]]
-PipelineHeader [k1 k2] = [[${k1}${k2}]]
+DetailsHeader [k1 k2] = [[${k1}${k2}\n]]
+PipelineHeader [k1 k2] = [[${k1}${k2}\n]]
 line [@cs] = [[${cs}]]
+PipelineLine [line] = [[${line}\n]]
 DetailsLine [line] = [[${line}]]
-FunctionHeader [id k1 k2] = [[${id}${k1}${k2}]]
-LoadCommand [k id] = [[${k}{id}]]
+FunctionHeader [id k1 k2 flc] = [[${id}${k1}${k2}\n${flc}]]
+FirstLoadCommand [cmd] = [[swipl ${cmd}']]
+LoadCommand [k id] = [[ -g 'consult(${id}).' ]]
+EndFunction [rb] = [[\n${rb}\n]]
 NotPipelineLine [line] = [[${line}]]
 
 id [name] = [[${name}]]
