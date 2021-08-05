@@ -53,6 +53,7 @@ spc [c] = [[${c}]]
 	allContains1
 	printAllDeepContains
 	printAllDirectContains
+	designRuleRectanglesMustNotIntersectOnTheSameDiagram
 
 
 
@@ -74,7 +75,11 @@ spc [c] = [[${c}]]
 	load onSameDiagram
 	load contain3
     exec printAllDirectContains
-
+### designRuleRectanglesMustNotIntersectOnTheSameDiagram
+	load fb
+	load onSameDiagram
+	load designRuleRectanglesMustNotIntersect
+    check designRuleRectanglesMustNotIntersectOnTheSameDiagram
 </textarea>
 
 <p>transpiled:</p>
@@ -158,11 +163,12 @@ Pseudo {
   PipelineHeader = "#" "_fb pipeline_"
   line = notEOL+
   PipelineLine = line
-  DetailsLine = FunctionHeader | LoadCommand | ExecCommand | ShCommand | EndFunction | NotPipelineLine
+  DetailsLine = FunctionHeader | LoadCommand | ExecCommand | CheckCommand | ShCommand | EndFunction | NotPipelineLine
   FunctionHeader = id "()" "{" FirstLoadCommand
   FirstLoadCommand = LoadCommand
   LoadCommand = "load" id
   ExecCommand = "exec" id
+  CheckCommand = "check" id
   ShCommand = "sh" line
   EndFunction = "}"
   NotPipelineLine = ~PipelineHeader line
@@ -196,6 +202,7 @@ FunctionHeader [id k1 k2 flc] = [[${id}${k1}${k2}\n${flc}]]
 FirstLoadCommand [cmd] = [[swipl ${cmd} ]]
 LoadCommand [k id] = [[ -g 'consult(${id}).' ]]
 ExecCommand [k id] = [[ -g '${id}.' -g 'halt.' | ./augment-fb.bash ]]
+CheckCommand [k id] = [[ -g '${id}.' -g 'halt.' | ./check-design-rule.bash ]]
 ShCommand [k line] = [[\n${line}]]
 EndFunction [rb] = [[\n${rb}\n]]
 NotPipelineLine [line] = [[${line}]]
