@@ -174,7 +174,7 @@ Pseudo {
 
 <p>b2bsw semantics:</p>
 <textarea id="b2bswsemantics" rows="10" cols="90" placeholder="semantics" style="background-color:oldlace;">
-Main [header details pipeline] = [[${header}${details}${pipeline}]]
+Main [header details pipeline] = {{ scopeAdd ('functionname', '<unknown>'); }} [[${header}${details}${pipeline}]]
 Header [k id] = [[${k}${id}\n]]
 DetailsSection [header @lines] = [[${header}${lines}]]
 PipelineSection [header @lines] = [[${header}${lines}]]
@@ -183,10 +183,10 @@ PipelineHeader [k1 k2] = [[${k1}${k2}\n]]
 line [@cs] = [[${cs}]]
 PipelineLine [line] = [[${line}\n]]
 DetailsLine [line] = [[${line}]]
-FunctionHeader [id k1 k2 flc] = [[${id}${k1}${k2}\n${flc}]]
+FunctionHeader [id k1 k2 flc] = {{ scopeModify ('functionname', _id._glue ()); }} [[${id}${k1}${k2}\n${flc}]]
 FirstLoadCommand [cmd] = [[swipl ${cmd}']]
 LoadCommand [k id] = [[ -g 'consult(${id}).' ]]
-EndFunction [rb] = [[\n${rb}\n]]
+EndFunction [rb] = [[ -g '${scopeGet ('functionname')}.' -g 'halt.'\n${rb}\n]]
 NotPipelineLine [line] = [[${line}]]
 
 id [name] = [[${name}]]
